@@ -65,6 +65,7 @@ public class OrderIntegrationTest {
                 .andExpect(jsonPath("$.clientName").value("Alice"))
                 .andExpect(jsonPath("$.items[0].fruitName").value("Apple"));
     }
+
     @Test
     void createOrder_ShouldReturn400_WhenClientNameIsBlank() throws Exception {
         String body = """
@@ -140,8 +141,22 @@ public class OrderIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void deleteOrder_ShouldReturn204_WhenIdExists() throws Exception {
+        String id = createOrderAndGetId();
 
+        mockMvc.perform(delete("/orders/" + id))
+                .andExpect(status().isNoContent());
 
+        mockMvc.perform(get("/orders/" + id))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteOrder_ShouldReturn404_WhenIdDoesNotExist() throws Exception {
+        mockMvc.perform(delete("/orders/nonexistent"))
+                .andExpect(status().isNotFound());
+    }
 
 }
 
