@@ -3,6 +3,7 @@ package cat.itacademy.s04.t02.n03.fruit_order_api.service;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderItemDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderRequestDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderResponseDTO;
+import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderUpdateDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.exception.OrderNotFoundException;
 import cat.itacademy.s04.t02.n03.fruit_order_api.model.Order;
 import cat.itacademy.s04.t02.n03.fruit_order_api.model.OrderItem;
@@ -129,6 +130,50 @@ public class OrderServiceImplTest {
 
         assertThrows(OrderNotFoundException.class, () -> orderService.getOrderById(wrongId));
         verify(orderRepository, times(1)).findById(wrongId);
+    }
+
+    @Test
+    void updateOrder_ShouldReturnUpdatedOrderResponseDTO_WhenIdExists() {
+        String id = "abc123";
+        List<OrderItemDTO> itemsUpdateRequestDTOs = List.of(
+                new OrderItemDTO("apple", 40),
+                new OrderItemDTO("strawberry", 10));
+        OrderUpdateDTO updateRequestDTO = new OrderUpdateDTO("Carlos Molina", deliveryDate, itemsUpdateRequestDTOs);
+
+        Order updatedOrder = new Order("Carlos Molina Updated", deliveryDate,
+                List.of(new OrderItem("apple", 40), new OrderItem("strawberry", 10)));
+        updatedOrder.setId(id);
+
+        when(orderRepository.findById(id)).thenReturn(Optional.of(order1));
+        when(orderRepository.save(any(Order.class))).thenReturn(updatedOrder);
+
+        OrderResponseDTO result = orderService.updateOrder(id, updateRequestDTO);
+
+        assertNotNull(result);
+        assertEquals(id, result.id());
+        assertEquals("Carlos Molina Updated", result.clientName());
+        assertEquals(2, result.items().size());
+        assertEquals("apple", result.items().get(0).fruitName());
+        verify(orderRepository, times(1)).findById(id);
+        verify(orderRepository, times(1)).save(any(Order.class));
+
+
+
+    }
+
+    @Test
+    void updateOrder_ShouldThrowOrderNotFoundException_WhenIdDoesNotExist() {
+        String id = "zyx987";
+        List<OrderItemDTO> itemsUpdateRequestDTOs = List.of(
+                new OrderItemDTO("apple", 40),
+                new OrderItemDTO("strawberry", 10));
+        OrderUpdateDTO updateRequestDTO = new OrderUpdateDTO("Carlos Molina", deliveryDate, itemsUpdateRequestDTOs);
+
+        when(orderRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(OrderNotFoundException.class, () -> orderService.updateOrder(id, updateRequestDTO));
+        verify(orderRepository, never()).save(any(Order.class));
+
     }
 
 

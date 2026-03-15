@@ -3,7 +3,10 @@ package cat.itacademy.s04.t02.n03.fruit_order_api.controller;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderItemDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderRequestDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderResponseDTO;
+import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderUpdateDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.exception.OrderNotFoundException;
+import cat.itacademy.s04.t02.n03.fruit_order_api.model.Order;
+import cat.itacademy.s04.t02.n03.fruit_order_api.model.OrderItem;
 import cat.itacademy.s04.t02.n03.fruit_order_api.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -159,6 +163,49 @@ public class OrderControllerTest {
 
         mockMvc.perform(get("/orders/zyx987")
                 .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateOrder_ShouldReturn200_WhenIdExists() throws Exception{
+        String id = "abc123";
+        List<OrderItemDTO> itemsUpdateRequestDTOs = List.of(
+                new OrderItemDTO("apple", 40),
+                new OrderItemDTO("strawberry", 10));
+        OrderUpdateDTO updateRequestDTO = new OrderUpdateDTO("Carlos Molina", deliveryDate, itemsUpdateRequestDTOs);
+
+        OrderResponseDTO responseDTO = new OrderResponseDTO("abc123", "Carlos Molina Update", deliveryDate,
+                List.of(new OrderItemDTO("apple", 40),
+                        new OrderItemDTO("strawberry", 10)));
+
+        when(orderService.updateOrder(eq(id), any(OrderUpdateDTO.class))).thenReturn(responseDTO);
+
+        mockMvc.perform(put("/orders/abc123")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.clientName").value("Carlos Molina Update"))
+                .andExpect(jsonPath("$.items[0].fruitName").value("apple"))
+                .andExpect(jsonPath("$.items[0].quantityInKilos").value(40))
+                .andExpect(jsonPath("$.items[1].fruitName").value("strawberry"))
+                .andExpect(jsonPath("$.items[1].quantityInKilos").value(10));
+    }
+
+    @Test
+    void updateOrder_ShouldReturn404_WhenIdDoesNotExist() throws Exception{
+        String id = "zyx987";
+        List<OrderItemDTO> itemsUpdateRequestDTOs = List.of(
+                new OrderItemDTO("apple", 40),
+                new OrderItemDTO("strawberry", 10));
+        OrderUpdateDTO updateRequestDTO = new OrderUpdateDTO("Carlos Molina", deliveryDate, itemsUpdateRequestDTOs);
+
+        when(orderService.updateOrder(eq(id), any(OrderUpdateDTO.class)))
+                .thenThrow(new OrderNotFoundException(id));
+
+        mockMvc.perform(put("/orders/zyx987")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequestDTO)))
                 .andExpect(status().isNotFound());
     }
 

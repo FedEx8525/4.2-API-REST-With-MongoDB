@@ -2,6 +2,7 @@ package cat.itacademy.s04.t02.n03.fruit_order_api.controller;
 
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderRequestDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderResponseDTO;
+import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderUpdateDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -35,5 +36,13 @@ public class OrderController {
     public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable String id) {
         OrderResponseDTO order = orderService.getOrderById(id);
         return new ResponseEntity<>(order, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<OrderResponseDTO> updateFruit(
+            @PathVariable String id,
+            @Valid @RequestBody OrderUpdateDTO orderUpdateDTO) {
+        OrderResponseDTO updatedOrder = orderService.updateOrder(id, orderUpdateDTO);
+        return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
     }
 }
