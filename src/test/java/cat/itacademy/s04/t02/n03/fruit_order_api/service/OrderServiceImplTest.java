@@ -15,10 +15,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -80,5 +81,34 @@ public class OrderServiceImplTest {
         assertEquals(50, result.items().get(0).quantityInKilos());
         verify(orderRepository, times(1)).save(any(Order.class));
     }
+
+    @Test
+    void listOrders_ShouldReturnListOfOrders_WhenOrdersExist() {
+
+        List<Order> orders = Arrays.asList(order1, order2);
+
+        when(orderRepository.findAll()).thenReturn(orders);
+
+        List<OrderResponseDTO> ordersDTO = orderService.listOrders();
+
+        assertEquals(2, ordersDTO.size());
+        assertEquals("abc123", ordersDTO.get(0).id());
+        assertEquals("def456", ordersDTO.get(1).id());
+        verify(orderRepository, times(1)).findAll();
+    }
+
+    @Test
+    void listOrder_ShouldReturnEmptyList_WhenNoOrdersExist() {
+
+        when(orderRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<OrderResponseDTO> ordersDTO = orderService.listOrders();
+
+        assertNotNull(ordersDTO);
+        assertTrue(ordersDTO.isEmpty());
+        verify(orderRepository, times(1)).findAll();
+
+    }
+
 
 }
