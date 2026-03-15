@@ -34,7 +34,6 @@ public class OrderServiceImplTest {
     private OrderItem item1;
     private OrderItem item2;
     private OrderItem item3;
-    private OrderItem item4;
     private List<OrderItem> items1;
     private List<OrderItem> items2;
     private Order order1;
@@ -51,12 +50,10 @@ public class OrderServiceImplTest {
         item1 = new OrderItem("banana", 50);
         item2 = new OrderItem("apple", 45);
         item3 = new OrderItem("mango", 10);
-        item4 = new OrderItem("peach", 60);
 
         items1.add(item1);
-        items1.add(item2);
+        items2.add(item2);
         items2.add(item3);
-        items2.add(item4);
 
         order1 = new Order("Carlos Molina", deliveryDate, items1);
         order1.setId("abc123");
