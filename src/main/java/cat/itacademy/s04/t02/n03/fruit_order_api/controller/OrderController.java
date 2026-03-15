@@ -30,4 +30,10 @@ public class OrderController {
         List<OrderResponseDTO> orders = orderService.listOrders();
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable String id) {
+        OrderResponseDTO order = orderService.getOrderById(id);
+        return new ResponseEntity<>(order, HttpStatus.OK);
+    }
 }
