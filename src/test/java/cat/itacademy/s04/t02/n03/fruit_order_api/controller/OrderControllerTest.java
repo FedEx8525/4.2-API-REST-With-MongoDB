@@ -67,6 +67,54 @@ public class OrderControllerTest {
     }
 
     @Test
+    void createOrder_ShouldReturn400_WhenClientNameIsBlank() throws Exception {
+        String body = """
+            {
+              "clientName": "",
+              "deliveryDate": "%s",
+              "items": [{"fruitName": "banana", "quantityInKilos": 50}]
+            }
+            """.formatted(deliveryDate);
+
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createOrder_ShouldReturn400_WhenItemsIsEmpty() throws Exception {
+        String body = """
+            {
+              "clientName": "Carlos Molina",
+              "deliveryDate": "%s",
+              "items": []
+            }
+            """.formatted(deliveryDate);
+
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createOrder_ShouldReturn400_WhenDeliveryDateIsInThePast() throws Exception {
+        String body = """
+            {
+              "clientName": "Carlos Molina",
+              "deliveryDate": "2020-01-01",
+              "items": [{"fruitName": "banana", "quantityInKilos": 50}]
+            }
+            """;
+
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void listOrders_ShouldReturn200_WhenOrdersExist() throws Exception{
         List<OrderResponseDTO> orders = List.of(response1, response2);
 
