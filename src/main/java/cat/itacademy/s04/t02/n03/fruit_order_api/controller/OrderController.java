@@ -6,10 +6,9 @@ import cat.itacademy.s04.t02.n03.fruit_order_api.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
@@ -24,5 +23,11 @@ public class OrderController {
     public ResponseEntity<OrderResponseDTO> createOrder(@Valid @RequestBody OrderRequestDTO orderRequestDTO) {
         OrderResponseDTO savedOrder = orderService.createOrder(orderRequestDTO);
         return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrderResponseDTO>> getOrders() {
+        List<OrderResponseDTO> orders = orderService.listOrders();
+        return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 }
