@@ -5,6 +5,7 @@ import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderRequestDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderResponseDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -17,7 +18,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(OrderController.class)
@@ -31,15 +32,25 @@ public class OrderControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private LocalDate deliveryDate;
+    private OrderResponseDTO response1;
+    private OrderResponseDTO response2;
+
+    @BeforeEach
+    void setup() {
+        deliveryDate = LocalDate.now().plusDays(1);
+        response1 = new OrderResponseDTO("abc123", "Carlos Molina", deliveryDate,
+                List.of(new OrderItemDTO("banana", 50)));
+        response2 = new OrderResponseDTO("def456", "Nieves Rodriguez", deliveryDate,
+                List.of(new OrderItemDTO("apple", 45), new OrderItemDTO("mango", 10)));
+    }
+
     @Test
     void createOrder_ShouldReturn201_WhenValidRequest() throws Exception {
         List<OrderItemDTO> itemsRequestDTOs = List.of(new OrderItemDTO("banana", 50));
-        LocalDate deliveryDate = LocalDate.now().plusDays(1);
         OrderRequestDTO orderRequestDTO = new OrderRequestDTO("Carlos Molina", deliveryDate, itemsRequestDTOs);
 
-        OrderResponseDTO orderResponseDTO = new OrderResponseDTO("abc123", "Carlos Molina", deliveryDate, itemsRequestDTOs);
-
-        when(orderService.createOrder(any(OrderRequestDTO.class))).thenReturn(orderResponseDTO);
+        when(orderService.createOrder(any(OrderRequestDTO.class))).thenReturn(response1);
 
         mockMvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -53,6 +64,31 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$.items.length()").value(1))
                 .andExpect(jsonPath("$.items[0].fruitName").value("banana"))
                 .andExpect(jsonPath("$.items[0].quantityInKilos").value(50));
+    }
+
+    @Test
+    void listOrders_ShouldReturn200_WhenOrdersExist() throws Exception{
+        List<OrderResponseDTO> orders = List.of(response1, response2);
+
+        when(orderService.listOrders()).thenReturn(orders);
+
+        mockMvc.perform(get("/orders")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value("abc123"))
+                .andExpect(jsonPath("$[1].id").value("def456"));
+    }
+
+    @Test
+    void listOrders_ShouldReturn200WithEmptyList_WhenNoOrdersExist () throws Exception{
+        when(orderService.listOrders()).thenReturn(List.of());
+
+        mockMvc.perform(get("/orders"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
 
