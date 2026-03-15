@@ -70,6 +70,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void deleteOrder(String id) {
-
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+        orderRepository.delete(order);
     }
 }
