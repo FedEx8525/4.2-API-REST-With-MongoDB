@@ -98,6 +98,21 @@ public class OrderIntegrationTest {
                 .andExpect(jsonPath("$[0].clientName").value("Alice"));
     }
 
+    @Test
+    void getOrderById_ShouldReturn200_WhenIdExists() throws Exception {
+        String id = createOrderAndGetId();
+
+        mockMvc.perform(get("/orders/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id));
+    }
+
+    @Test
+    void getOrderById_ShouldReturn404_WhenIdDoesNotExist() throws Exception {
+        mockMvc.perform(get("/orders/nonexistent"))
+                .andExpect(status().isNotFound());
+    }
+
 
 
 
