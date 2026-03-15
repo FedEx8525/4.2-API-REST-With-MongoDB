@@ -1,11 +1,13 @@
 package cat.itacademy.s04.t02.n03.fruit_order_api.service;
 
+import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderItemDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderRequestDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderResponseDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderUpdateDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.exception.OrderNotFoundException;
 import cat.itacademy.s04.t02.n03.fruit_order_api.mapper.OrderMapper;
 import cat.itacademy.s04.t02.n03.fruit_order_api.model.Order;
+import cat.itacademy.s04.t02.n03.fruit_order_api.model.OrderItem;
 import cat.itacademy.s04.t02.n03.fruit_order_api.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +17,7 @@ import static cat.itacademy.s04.t02.n03.fruit_order_api.mapper.OrderMapper.mapTo
 import static cat.itacademy.s04.t02.n03.fruit_order_api.mapper.OrderMapper.mapToEntity;
 
 @Service
-public class OrderServiceImpl implements OrderService{
+public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
 
@@ -46,7 +48,24 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     public OrderResponseDTO updateOrder(String id, OrderUpdateDTO orderUpdateDTO) {
-        return null;
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+        if (orderUpdateDTO.clientName() != null && !orderUpdateDTO.clientName().isBlank()) {
+            order.setClientName(orderUpdateDTO.clientName());
+        }
+        if (orderUpdateDTO.deliveryDate() != null) {
+            order.setDeliveryDate(orderUpdateDTO.deliveryDate());
+        }
+        if (orderUpdateDTO.items() != null && !orderUpdateDTO.items().isEmpty()) {
+            List<OrderItem> newItems = orderUpdateDTO.items().stream()
+                    .map(item -> new OrderItem(item.fruitName(), item.quantityInKilos()))
+                    .toList();
+
+            order.setItems(newItems);
+        }
+        Order savedOrder = orderRepository.save(order);
+
+        return mapToDTO(savedOrder);
     }
 
     @Override
