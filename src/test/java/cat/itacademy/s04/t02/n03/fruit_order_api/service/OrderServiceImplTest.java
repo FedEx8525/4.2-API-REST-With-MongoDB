@@ -3,6 +3,7 @@ package cat.itacademy.s04.t02.n03.fruit_order_api.service;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderItemDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderRequestDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderResponseDTO;
+import cat.itacademy.s04.t02.n03.fruit_order_api.exception.OrderNotFoundException;
 import cat.itacademy.s04.t02.n03.fruit_order_api.model.Order;
 import cat.itacademy.s04.t02.n03.fruit_order_api.model.OrderItem;
 import cat.itacademy.s04.t02.n03.fruit_order_api.repository.OrderRepository;
@@ -14,10 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -108,6 +106,29 @@ public class OrderServiceImplTest {
         assertTrue(ordersDTO.isEmpty());
         verify(orderRepository, times(1)).findAll();
 
+    }
+
+    @Test
+    void getOrderById_ShouldReturnOrderResponseDTO_WhenIdExists() {
+        String id = "abc123";
+        when(orderRepository.findById(id)).thenReturn(Optional.of(order1));
+
+        OrderResponseDTO orderDTO = orderService.getOrderById(id);
+
+        assertNotNull(orderDTO);
+        assertEquals(id, orderDTO.id());
+        verify(orderRepository, times(1)).findById(id);
+
+    }
+
+    @Test
+    void getOrderById_ThrowOrderNotFoundException_WhenIdDoesNotExist() {
+        String wrongId = "zyx987";
+
+        when(orderRepository.findById(wrongId)).thenReturn(Optional.empty());
+
+        assertThrows(OrderNotFoundException.class, () -> orderService.getOrderById(wrongId));
+        verify(orderRepository, times(1)).findById(wrongId);
     }
 
 

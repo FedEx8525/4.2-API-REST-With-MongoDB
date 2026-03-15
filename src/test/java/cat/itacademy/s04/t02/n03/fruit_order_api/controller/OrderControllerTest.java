@@ -3,6 +3,7 @@ package cat.itacademy.s04.t02.n03.fruit_order_api.controller;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderItemDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderRequestDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderResponseDTO;
+import cat.itacademy.s04.t02.n03.fruit_order_api.exception.OrderNotFoundException;
 import cat.itacademy.s04.t02.n03.fruit_order_api.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -139,5 +140,26 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
+    @Test
+    void getOrderById_ShouldReturn200_WhenIdExists() throws Exception{
+        String id = "abc123";
+        when(orderService.getOrderById(id)).thenReturn(response1);
+
+        mockMvc.perform(get("/orders/abc123")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id));
+    }
+
+    @Test
+    void getOrderById_ShouldReturn404_WhenIdDoesNotExist() throws Exception{
+        String id = "zyx987";
+        when(orderService.getOrderById(id))
+                .thenThrow(new OrderNotFoundException(id));
+
+        mockMvc.perform(get("/orders/zyx987")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 
 }

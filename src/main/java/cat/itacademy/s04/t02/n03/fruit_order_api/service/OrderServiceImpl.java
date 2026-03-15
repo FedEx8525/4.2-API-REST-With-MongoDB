@@ -3,6 +3,7 @@ package cat.itacademy.s04.t02.n03.fruit_order_api.service;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderRequestDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderResponseDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderUpdateDTO;
+import cat.itacademy.s04.t02.n03.fruit_order_api.exception.OrderNotFoundException;
 import cat.itacademy.s04.t02.n03.fruit_order_api.mapper.OrderMapper;
 import cat.itacademy.s04.t02.n03.fruit_order_api.model.Order;
 import cat.itacademy.s04.t02.n03.fruit_order_api.repository.OrderRepository;
@@ -38,7 +39,9 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     public OrderResponseDTO getOrderById(String id) {
-        return null;
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+        return mapToDTO(order);
     }
 
     @Override
