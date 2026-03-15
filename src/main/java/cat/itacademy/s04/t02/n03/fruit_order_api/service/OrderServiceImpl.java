@@ -3,6 +3,7 @@ package cat.itacademy.s04.t02.n03.fruit_order_api.service;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderRequestDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderResponseDTO;
 import cat.itacademy.s04.t02.n03.fruit_order_api.dto.OrderUpdateDTO;
+import cat.itacademy.s04.t02.n03.fruit_order_api.mapper.OrderMapper;
 import cat.itacademy.s04.t02.n03.fruit_order_api.model.Order;
 import cat.itacademy.s04.t02.n03.fruit_order_api.repository.OrderRepository;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,9 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     public List<OrderResponseDTO> listOrders() {
-        return List.of();
+        return orderRepository.findAll().stream()
+                .map(OrderMapper::mapToDTO)
+                .toList();
     }
 
     @Override
