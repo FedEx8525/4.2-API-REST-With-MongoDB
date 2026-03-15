@@ -113,6 +113,33 @@ public class OrderIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void updateOrder_ShouldReturn200_WhenValidRequest() throws Exception {
+        String id = createOrderAndGetId();
+
+        String updateBody = """
+                {"clientName": "Bob"}
+                """;
+
+        mockMvc.perform(put("/orders/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.clientName").value("Bob"));
+    }
+
+    @Test
+    void updateOrder_ShouldReturn404_WhenIdDoesNotExist() throws Exception {
+        String updateBody = """
+                {"clientName": "Bob"}
+                """;
+
+        mockMvc.perform(put("/orders/nonexistent")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateBody))
+                .andExpect(status().isNotFound());
+    }
+
 
 
 
