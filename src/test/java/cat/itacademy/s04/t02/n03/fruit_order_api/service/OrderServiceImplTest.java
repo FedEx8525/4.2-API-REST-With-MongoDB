@@ -176,5 +176,29 @@ public class OrderServiceImplTest {
 
     }
 
+    @Test
+    void deleteOrder_ShouldDeleteOrder_WhenIdExists() {
+        String id = "abc123";
+
+        when(orderRepository.existsById(id)).thenReturn(true);
+        doNothing().when(orderRepository).deleteById(id);
+
+        orderService.deleteOrder(id);
+
+        verify(orderRepository, times(1)).existsById(id);
+        verify(orderRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    void deleteOrder_ShouldThrowOrderNotFoundException_WhenIdDoesNotExist() {
+        String id = "zyx987";
+
+        when(orderRepository.existsById(id)).thenReturn(false);
+
+        assertThrows(OrderNotFoundException.class, () -> orderService.deleteOrder(id));
+
+        verify(orderRepository, never()).deleteById(anyString());
+    }
+
 
 }
