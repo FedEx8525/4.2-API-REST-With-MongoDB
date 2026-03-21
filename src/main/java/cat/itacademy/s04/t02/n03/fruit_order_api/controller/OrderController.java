@@ -39,7 +39,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrderResponseDTO> updateFruit(
+    public ResponseEntity<OrderResponseDTO> updateOrder(
             @PathVariable String id,
             @Valid @RequestBody OrderUpdateDTO orderUpdateDTO) {
         OrderResponseDTO updatedOrder = orderService.updateOrder(id, orderUpdateDTO);
